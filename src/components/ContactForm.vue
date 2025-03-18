@@ -38,7 +38,7 @@
         </div>
         <div class="form-group">
             <button class="btn btn-primary">Lưu</button>
-            <button v-if="contactLocal._id" type="button" class="ml-2 btn btn-danger" @click="deleteContact">
+            <button v-on="$attrs" v-if="contactLocal?._id" type="button" class="ml-2 btn btn-danger" @click="deleteContact">
                 Xóa
             </button>
             <button type="button" class="ml-2 btn btn-danger" @click="Cancel">
@@ -58,7 +58,7 @@ export default {
     },
     emits: ["submit:contact", "delete:contact"],
     props: {
-        contact: { type: Object, required: true }
+        contact: { type: [Object, null], required: false }
     },
     data() {
         const contactFormSchema = yup.object().shape({
@@ -80,12 +80,12 @@ export default {
                 ),
         });
         return {
-            // Chúng ta sẽ không muốn hiệu chỉnh props, nên tạo biến cục bộ
-            // contactLocal để liên kết với các input trên form
-            contactLocal: this.contact,
+            // để giá trị mặt định sau đó set lại khi dùng
+            contactLocal: null,
             contactFormSchema,
         };
     },
+    
     methods: {
         submitContact() {
             this.$emit("submit:contact", this.contactLocal);
@@ -102,6 +102,21 @@ export default {
                 return false
             }
             else this.$router.push({ name: "contactbook" });
+        }
+    },
+    
+    created() {
+        // kiểm tra xem có contact nào ko (nếu có là form edit, ko thì form tạo mới)
+        if (this.contact) {
+            this.contactLocal = { ...this.contact };
+        } else {
+            this.contactLocal = {
+                name: "",
+                email: "",
+                address: "",
+                phone: "",
+                favorite: false,
+            }
         }
     },
 };
